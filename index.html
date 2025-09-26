@@ -1,101 +1,122 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>AirUプロマネ送別会 想い出ビンゴ大会</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>想い出BINGOでドン</title>
   <style>
-    body { 
-      font-family: Arial, sans-serif; 
-      text-align: center; 
-      margin: 0; padding: 0;
+    :root{
+      --card-max: 95vmin;
+      --cell-font: clamp(20px, 8vmin, 32px);
+      --head-font: clamp(18px, 6vmin, 26px);
+      --title-font: clamp(22px, 8vmin, 34px);
+      --subtitle-font: clamp(14px, 4.5vmin, 20px);
+      --gap: 36px;
     }
-    .card-container { 
-      display: flex; 
-      flex-direction: column; /* 縦並び */
-      align-items: center;
-      gap: 40px; 
-      margin-top: 20px; 
-      padding: 10px;
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+      margin: 0; padding: 10px 12px 40px; text-align: center;
+      background: #E1F0F8;
     }
-    .card-block { 
-      width: 100%; 
-      max-width: 400px; /* 横幅を制御 */
+    h1 { margin: 8px 0 4px; font-size: var(--title-font); line-height:1.3; }
+    h2 { margin: 0 0 16px; font-size: var(--subtitle-font); font-weight: 500; }
+    button {
+      padding: 12px 18px; font-size: 18px; border-radius: 10px; border: 1px solid #ccc;
+      background:#fff; cursor:pointer;
     }
-    table { 
-      border-collapse: collapse; 
-      width: 100%; 
+    .card-container {
+      display: flex; flex-direction: column; align-items: center;
+      gap: var(--gap); margin-top: 14px;
+    }
+    .card-block { width: min(var(--card-max), 520px); margin: 0 auto; }
+    .name { margin: 4px 0 8px; font-weight: 700; font-size: var(--head-font); }
+    table {
+      width: 100%; border-collapse: collapse; table-layout: fixed;
+      border: 2px solid #1e4f82; border-radius: 10px; overflow: hidden;
+      background:#fff;
     }
     th, td {
-      border: 2px solid #333;
-      aspect-ratio: 1/1; /* 正方形に */
-      text-align: center; 
-      font-size: clamp(14px, 5vw, 22px); /* 画面に応じて文字サイズ調整 */
-      cursor: pointer; /* クリック可能に見せる */
-      background: white;
+      border: 1.5px solid #1e4f82;
+      width: 20%;
+      height: 16vmin;
+      text-align: center;
+      font-size: var(--cell-font);
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: background .12s ease, color .12s ease, transform .05s;
     }
-    th { background: #3498db; color: #fff; cursor: default; }
-    td.free { background: #e74c3c; color: #fff; font-weight: bold; cursor: default; }
-    td.marked { background: red; color: #fff; } /* クリックで赤くする */
-    h2 { margin: 0 0 10px; font-size: clamp(16px, 6vw, 24px); }
+    th {
+      background:#2f7ecb; color:#fff; font-weight: 800;
+      cursor: default; height: 44px;
+    }
+    td { background:#ffffff; cursor: pointer; }
+    td.free { background:#e74c3c; color:#fff; font-weight: 800; cursor: default; }
+    td.marked { background:#ff3b30; color:#fff; }
+    td:active { transform: scale(0.97); }
   </style>
 </head>
 <body>
-  <h1>🎉 想い出BINGOでドン~2人を一番理解してるのは私だ！~ 🎉</h1>
+  <h1>🎉 想い出BINGOでドン 🎉</h1>
+  <h2>~2人を一番理解してるのは私だ！~</h2>
+
   <button onclick="generateCards()">カードを生成する</button>
+
   <div id="cards" class="card-container"></div>
 
   <script>
-    function shuffle(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
+    function shuffle(a){
+      for(let i=a.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [a[i],a[j]]=[a[j],a[i]];
       }
-      return array;
+      return a;
     }
 
-    function generateCard() {
-      let numbers = shuffle([...Array(25).keys()].map(n => n + 1)); // 1〜25
-      let card = [];
-      for (let i = 0; i < 5; i++) {
-        card.push(numbers.slice(i * 5, (i + 1) * 5));
-      }
-      card[2][2] = "FREE"; // 中央をFREE
-      return card;
+    function generateCard(){
+      const numbers = shuffle([...Array(25)].map((_,i)=>i+1)); // 1..25
+      const grid = [];
+      for(let r=0;r<5;r++) grid.push(numbers.slice(r*5,(r+1)*5));
+      grid[2][2] = "FREE"; // 中央
+      return grid;
     }
 
-    function renderCard(card, title) {
-      let html = `<div class="card-block"><h2>${title}</h2>`;
-      html += "<table><tr><th>B</th><th>I</th><th>N</th><th>G</th><th>O</th></tr>";
-      for (let row = 0; row < 5; row++) {
+    function renderCard(grid, name){
+      let html = `<div class="card-block">
+        <div class="name">${name}</div>
+        <table>
+          <tr><th>B</th><th>I</th><th>N</th><th>G</th><th>O</th></tr>`;
+      for(let r=0;r<5;r++){
         html += "<tr>";
-        for (let col = 0; col < 5; col++) {
-          let val = card[row][col];
-          if (val === "FREE") {
+        for(let c=0;c<5;c++){
+          const v = grid[r][c];
+          if(v==="FREE"){
             html += `<td class="free">FREE</td>`;
-          } else {
-            html += `<td onclick="toggleCell(this)">${val}</td>`;
+          }else{
+            html += `<td onclick="toggleCell(this)">${v}</td>`;
           }
         }
         html += "</tr>";
       }
-      html += "</table></div>";
+      html += `</table></div>`;
       return html;
     }
 
-    function toggleCell(cell) {
-      cell.classList.toggle("marked");
-    }
+    function toggleCell(td){ td.classList.toggle("marked"); }
 
-    function generateCards() {
+    function generateCards(){
       const container = document.getElementById("cards");
       container.innerHTML = "";
-      const names = ["武永さん", "長尾さん"];
-      names.forEach(name => {
-        let card = generateCard();
-        container.innerHTML += renderCard(card, name);
+      const names = ["武永さん","長尾さん"];
+      names.forEach(n=>{
+        const card = generateCard();
+        container.insertAdjacentHTML("beforeend", renderCard(card, n));
       });
     }
+
+    generateCards();
   </script>
 </body>
 </html>
+
 
