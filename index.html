@@ -2,79 +2,100 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>BINGOカード発行</title>
+  <title>1〜25 ビンゴカード</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; }
-    .card-container { display: flex; justify-content: center; gap: 30px; margin-top: 20px; }
-    table { border-collapse: collapse; margin: 10px auto; }
+    body { 
+      font-family: Arial, sans-serif; 
+      text-align: center; 
+      margin: 0; padding: 0;
+    }
+    .card-container { 
+      display: flex; 
+      flex-direction: column; /* 縦並び */
+      align-items: center;
+      gap: 40px; 
+      margin-top: 20px; 
+      padding: 10px;
+    }
+    .card-block { 
+      width: 100%; 
+      max-width: 400px; /* 横幅を制御 */
+    }
+    table { 
+      border-collapse: collapse; 
+      width: 100%; 
+    }
     th, td {
       border: 2px solid #333;
-      width: 60px; height: 60px;
-      text-align: center; font-size: 20px;
+      aspect-ratio: 1/1; /* 正方形に */
+      text-align: center; 
+      font-size: clamp(14px, 5vw, 22px); /* 画面に応じて文字サイズ調整 */
+      cursor: pointer; /* クリック可能に見せる */
+      background: white;
     }
-    th { background: #f39c12; color: #fff; }
-    td.free { background: #e74c3c; color: #fff; font-weight: bold; }
+    th { background: #3498db; color: #fff; cursor: default; }
+    td.free { background: #e74c3c; color: #fff; font-weight: bold; cursor: default; }
+    td.marked { background: red; color: #fff; } /* クリックで赤くする */
+    h2 { margin: 0 0 10px; font-size: clamp(16px, 6vw, 24px); }
   </style>
 </head>
 <body>
-  <h1>🎉 BINGOカード発行サイト 🎉</h1>
+  <h1>🎉 オリジナル 1〜25 ビンゴ 🎉</h1>
   <button onclick="generateCards()">カードを生成する</button>
   <div id="cards" class="card-container"></div>
 
   <script>
-    function generateCard() {
-      const ranges = {
-        B: [1, 15],
-        I: [16, 30],
-        N: [31, 45],
-        G: [46, 60],
-        O: [61, 75]
-      };
-
-      const card = { B: [], I: [], N: [], G: [], O: [] };
-
-      for (let col in ranges) {
-        let [min, max] = ranges[col];
-        let nums = [];
-        while (nums.length < 5) {
-          let n = Math.floor(Math.random() * (max - min + 1)) + min;
-          if (!nums.includes(n)) nums.push(n);
-        }
-        card[col] = nums;
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
       }
-      card.N[2] = "FREE"; // 中央
+      return array;
+    }
+
+    function generateCard() {
+      let numbers = shuffle([...Array(25).keys()].map(n => n + 1)); // 1〜25
+      let card = [];
+      for (let i = 0; i < 5; i++) {
+        card.push(numbers.slice(i * 5, (i + 1) * 5));
+      }
+      card[2][2] = "FREE"; // 中央をFREE
       return card;
     }
 
-    function renderCard(card) {
-      const cols = ["B","I","N","G","O"];
-      let html = "<table><tr>";
-      cols.forEach(c => html += `<th>${c}</th>`);
-      html += "</tr>";
+    function renderCard(card, title) {
+      let html = `<div class="card-block"><h2>${title}</h2>`;
+      html += "<table><tr><th>B</th><th>I</th><th>N</th><th>G</th><th>O</th></tr>";
       for (let row = 0; row < 5; row++) {
         html += "<tr>";
-        cols.forEach(c => {
-          let val = card[c][row];
+        for (let col = 0; col < 5; col++) {
+          let val = card[row][col];
           if (val === "FREE") {
             html += `<td class="free">FREE</td>`;
           } else {
-            html += `<td>${val}</td>`;
+            html += `<td onclick="toggleCell(this)">${val}</td>`;
           }
-        });
+        }
         html += "</tr>";
       }
-      html += "</table>";
+      html += "</table></div>";
       return html;
+    }
+
+    function toggleCell(cell) {
+      cell.classList.toggle("marked");
     }
 
     function generateCards() {
       const container = document.getElementById("cards");
       container.innerHTML = "";
-      for (let i = 0; i < 2; i++) {
+      const names = ["武永さん", "長尾さん"];
+      names.forEach(name => {
         let card = generateCard();
-        container.innerHTML += renderCard(card);
-      }
+        container.innerHTML += renderCard(card, name);
+      });
     }
   </script>
 </body>
 </html>
+
